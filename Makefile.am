@@ -62,6 +62,14 @@ check_PROGRAMS = test_timing
 test_timing_SOURCES = timing.c test_timing.c
 test_timing_CFLAGS = $(AM_CFLAGS)
 
+if WIN32
+TESTS += test_win32_rx_wait
+check_PROGRAMS += test_win32_rx_wait
+test_win32_rx_wait_SOURCES = test_win32_rx_wait.c windows.c timing.c
+test_win32_rx_wait_CFLAGS = $(AM_CFLAGS)
+test_win32_rx_wait_LDADD = $(SP_LIBS)
+endif
+
 EXTRA_DIST = Doxyfile \
 	examples/Makefile \
 	examples/README \

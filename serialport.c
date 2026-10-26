@@ -1045,11 +1045,13 @@ static enum sp_return restart_wait_if_needed(struct sp_port *port, unsigned int 
 	DWORD errors;
 	COMSTAT comstat;
 
-	/* Only skip restarting the wait operation if we didn't have a
-	 * wakeup immediately following the exit of the last thread that
-	 * re-initiated the wait loop.
+	/* An empty read can follow a completed notification, including a
+	 * synchronous WaitCommEvent(). Only skip the restart check if the
+	 * notification is still unsignaled and the wait thread did not exit.
+	 * The manual-reset event can be inspected without consuming it.
 	 */
-	if (!port->last_wait_thread_exited && bytes_read == 0)
+	if (!port->last_wait_thread_exited && bytes_read == 0 &&
+			WaitForSingleObject(port->wait_ovl.hEvent, 0) == WAIT_TIMEOUT)
 		RETURN_OK();
 
 	if (ClearCommError(port->hdl, &errors, &comstat) == 0)
